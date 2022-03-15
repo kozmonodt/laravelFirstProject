@@ -1,7 +1,6 @@
 @extends('layouts.main')
 @section('content')
-<div>
-    This is post page shit
-</div>
+    <div>
+        This is contacts page shit
+    </div>
 @endsection
-
