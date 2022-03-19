@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -9,61 +10,67 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::all();
-        return view('posts' , compact('posts'));
-        dd($posts);
-//        $posts = Post::where('is_published', 1)->get();
-//        $posts = Post::where('is_published', 1)->first();
-//        foreach ($posts as $post){
-//            dump($post->title);
-//        }
-//        dump($posts->title);
+        $category = Category::find(1);
+
+//        $posts = Post::where('category_id', $category->id)->get();
+        $post = Post::find(1);
+        dd($category->posts);
+//        dd($post->category);
+//        return view('post.index' , compact('posts'));
+
 
     }
 
     public function create()
     {
-        $postsArr = [
-            [
-                'title' => 'title of post from phpstorm',
-                'content' => 'some interesting content',
-                'image' => 'image.jpg',
-                'likes' => 20,
-                'is_published' => 1,
-            ],
-            [
-                'title' => 'another title of post from phpstorm',
-                'content' => 'another some interesting content',
-                'image' => 'another_image.jpg',
-                'likes' => 50,
-                'is_published' => 1,
-            ],
-        ];
+        return view('post.create');
 
-        foreach ($postsArr as $item) {
-            dump($item);
-            Post::create($item);
-        }
-        dd('created');
     }
 
-    public function update()
+    public function store()
     {
-        $post = Post::find(6);
-        $post->update([
-            'title' => 'updated',
-            'content' => 'updated',
-            'image' => 'updated',
-            'likes' => 51,
-            'is_published' => 1,
+        $data = request()->validate([
+            'title' => 'string',
+            'content' => 'string',
+            'image' => 'string',
         ]);
-        dd('updated');
+        Post::create($data);
+        return redirect()->route('posts.index');
+    }
+
+    public function show(Post $post)
+    {
+        return view('post.show', compact('post'));
+    }
+
+    public function edit(Post $post)
+    {
+        return view('post.edit', compact('post'));
+    }
+
+    public function update(Post $post)
+    {
+        $data = request()->validate([
+            'title' => 'string',
+            'content' => 'string',
+            'image' => 'string',
+        ]);
+        $post->update($data);
+        return redirect()->route('posts.show', $post->id);
+
+    }
+
+
+    public function destroy(Post $post)
+    {
+        $post->delete();
+        return redirect()->route('posts.index');
     }
 
     public function delete()
     {
-       $post = Post::withTrashed()->find(2);
-       $post->restore();
+        $post = Post::withTrashed()->find(2);
+        $post->restore();
         dd('restored');
     }
 
@@ -79,7 +86,7 @@ class PostController extends Controller
         ];
         $post = Post::firstOrCreate([
             'title' => 'shit'
-        ],[
+        ], [
             'title' => 'some post shit',
             'content' => 'another some interesting content',
             'image' => 'another_image.jpg',
